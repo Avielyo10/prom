@@ -7,11 +7,12 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      app: process-exporter
+      app.kubernetes.io/name: process-exporter
   template:
     metadata:
       labels:
-        app: process-exporter
+        app.kubernetes.io/name: process-exporter
+        app.kubernetes.io/version: v1.0.1
       name: process-exporter
       namespace: openshift-monitoring
     spec:
