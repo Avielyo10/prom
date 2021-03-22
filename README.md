@@ -69,17 +69,6 @@ Sum all the infrastructure pods and OS processes into a single number:
 
     sum(avg_over_time(namedprocess_namegroup_thread_cpu_rate{threadname!~"process-exp.*"}[10m]))
 
-# Scraping Data Out
-
-I have an example script, [prometheus-csv](./prometheus-csv), which will
-contact a given cluster over the metrics interface, gather the average CPU,
-max CPU, and min CPU over the time period specified, and produce csv output.
-This intentionally excludes the 'process-exporter' pod itself, but does
-include every Host OS process gathered by the process-exporter pod, plus all
-the other pods on the system.  If you're running CPU-intensive workloads, it
-should be easy to adapt the script to exclude those from the accounting by
-filtering on namespace or something.
-
 # Overhead
 
 With the prometheus instance set up to scrape the metrics every 15s, the
@@ -92,9 +81,33 @@ but the prometheus scraping is disabled (by temporarily deleting the
 servicemonitor), then steady-state operation.  The avg prometheus instance CPU
 is basically unchanged throughout.
 
+# Scraping Data Out
+
+The top-level 'setup.py' installs a tool called `prom` which can facilitate
+scraping metrics from Prometheus in an automated fashion.
+
+This tool will contact a given cluster over the metrics interface, gather the
+average CPU, max CPU, and min CPU over the time period specified, and produce
+csv output.  This intentionally excludes the 'process-exporter' pod itself, but
+does include every Host OS process gathered by the process-exporter pod, plus
+all the other pods on the system.  If you're running CPU-intensive workloads,
+it also allows filtering out all the pods from specific namespaces.
+
+## Install the prom tool
+
+```
+pip install [-e] .
+```
+
+(Use '-e' to install a live development variant, useful for hacking on the tool)
+
+## Running the prom tool
+
+```
+prom metrics --help
+```
+
 # TODO
-- Cleaner packaging.  Maybe a deployment or daemonset?
 - Maybe adapt process-exporter to do more container-gnostic filtering, perhaps
   based on cgroup filtering?
 - Add labels to differentiate "infrastructure pods" from "workload pods"
-- Add a label or config change to exclude process-exporter itself
