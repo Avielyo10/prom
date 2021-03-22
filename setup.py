@@ -14,7 +14,7 @@ setuptools.setup(
     description="Process Interrogator for OpenShift",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    # url="https://github.com/Avielyo10/jinja2-tools.git", #TODO move to new repo?
+    url="https://github.com/Avielyo10/prome.git",
     packages=setuptools.find_packages(),
     install_requires=[
         'Click',
