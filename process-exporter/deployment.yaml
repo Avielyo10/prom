@@ -1,0 +1,75 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: process-exporter
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: process-exporter
+  template:
+    metadata:
+      labels:
+        app: process-exporter
+      name: process-exporter
+      namespace: openshift-monitoring
+    spec:
+      containers:
+        - args:
+            - -config.path
+            - /config/config.yml
+          image: quay.io/jramsay/process-exporter:ppid-2
+          imagePullPolicy: IfNotPresent
+          name: process-exporter
+          resources:
+            requests:
+              cpu: 8m
+              memory: 180Mi
+          volumeMounts:
+            - mountPath: /host/proc
+              name: proc
+            - mountPath: /host/sys
+              name: sys
+            - mountPath: /config
+              name: config
+          ports:
+            - containerPort: 9256
+              hostPort: 9256
+              name: metrics
+              protocol: TCP
+          resources:
+            requests:
+              cpu: 1m
+              memory: 30Mi
+      dnsPolicy: ClusterFirst
+      enableServiceLinks: true
+      hostNetwork: true
+      hostPID: true
+      nodeSelector:
+        kubernetes.io/os: linux
+      preemptionPolicy: PreemptLowerPriority
+      priority: 2000000000
+      priorityClassName: system-cluster-critical
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      serviceAccount: node-exporter
+      serviceAccountName: node-exporter
+      terminationGracePeriodSeconds: 30
+      tolerations:
+        - operator: Exists
+      volumes:
+        - hostPath:
+            path: /proc
+            type: ""
+          name: proc
+        - hostPath:
+            path: /sys
+            type: ""
+          name: sys
+        - configMap:
+            name: process-exporter
+            items:
+              - key: config.yml
+                path: config.yml
+          name: config

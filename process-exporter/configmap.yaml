@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: process-exporter
+  namespace: openshift-monitoring
+data:
+  config.yml: |
+    process_names:
+      - comm:
+        - systemd
+        cmdline:
+        - --system
+      - ppid: 1

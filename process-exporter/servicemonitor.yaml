@@ -1,0 +1,25 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  labels:
+    k8s-app: process-exporter
+  name: process-exporter
+  namespace: openshift-monitoring
+spec:
+  endpoints:
+  - interval: 15s
+    port: metrics
+    scheme: http
+    relabelings:
+    - action: replace
+      regex: (.*)
+      replacement: $1
+      sourceLabels:
+      - __meta_kubernetes_pod_node_name
+      targetLabel: instance
+    - action: labeldrop
+      regex: pod|container|endpoint|job|service|namespace
+  jobLabel: app.kubernetes.io/name
+  selector:
+    matchLabels:
+      k8s-app: process-exporter

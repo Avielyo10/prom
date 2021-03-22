@@ -1,0 +1,13 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: process-exporter-rules
+  namespace: openshift-monitoring
+spec:
+  groups:
+  - name: process-exporter.rules
+    rules:
+    - record: namedprocess_namegroup_cpu_rate
+      expr: sum without(mode) (irate(namedprocess_namegroup_cpu_seconds_total[30s]))
+    - record: namedprocess_namegroup_thread_cpu_rate
+      expr: sum without(mode) (irate(namedprocess_namegroup_thread_cpu_seconds_total[30s]))
