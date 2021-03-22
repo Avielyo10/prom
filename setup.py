@@ -22,6 +22,8 @@ setuptools.setup(
         'PyYAML',
         'requests',
         'pandas',
+        'openshift-client',
+        'setuptools_rust'
     ],
     classifiers=[
         "Programming Language :: Python :: 3",

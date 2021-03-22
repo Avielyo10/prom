@@ -10,6 +10,8 @@ import yaml
 import pandas as pd
 from io import StringIO
 
+import openshift as oc
+
 from .prometheus import Prometheus
 
 
@@ -61,7 +63,7 @@ def metrics(host, token, interval, time, skip_namespaces, output, sort_by):
 
     if sort_by is not None:
         df.sort_values(by=f'{sort_by} over {interval}', inplace=True)
-        
+
     if output == 'json':
         df.to_json(sys.stdout, orient='index')
     elif output == 'yaml':
@@ -72,6 +74,35 @@ def metrics(host, token, interval, time, skip_namespaces, output, sort_by):
     else:
         df.to_csv(sys.stdout)
 
-@main.command()
+
+@main.command(help="Deploy process-exporter resources")
 def deploy():
-    
+    oc_handler(oc.apply, "deployed.")
+
+
+@main.command(help="Delete process-exporter resources")
+def delete():
+    oc_handler(oc.delete, "deleted.")
+
+
+def oc_handler(func, msg):
+    files_path, list_of_files = get_data_file_dir()
+    for file in list_of_files:
+        with open(os.path.join(files_path, file), 'r') as resource:
+            try:
+                func(yaml.load(resource, Loader=yaml.FullLoader))
+                print(file.split('.')[0], msg)
+            except oc.model.OpenShiftPythonException as e:
+                print(e.msg, file.split('.')[0])
+
+
+def get_data_file_dir():
+    files_path = os.path.join(sys.exec_prefix, 'local', '.prom')
+    if not os.path.isdir(files_path):
+        files_path = os.path.join(sys.exec_prefix, '.prom')
+        if not os.path.isdir(files_path):
+            raise Exception("[ERROR] Couldn't find data files")
+    list_of_files = ["prometheusRules.yaml", "configmap.yaml",
+                     "service.yaml", "servicemonitor.yaml", "daemonset.yaml"]
+
+    return files_path, list_of_files
