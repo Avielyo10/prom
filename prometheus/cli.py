@@ -3,6 +3,7 @@ prome cli
 """
 
 import click
+import os
 import sys
 import json
 import yaml
@@ -61,9 +62,9 @@ def metrics(host, token, interval, time, skip_namespaces, output):
     if output is 'json':
         df.to_json(sys.stdout, orient='index')
     elif output is 'yaml':
-        sys.stdout = StringIO()
-        y = yaml.load(df.to_json(sys.stdout), Loader=yaml.FullLoader)
-        sys.stdout = sys.__stdout__
-        print(y)
+        std = StringIO()
+        df.to_json(std, orient='index')
+        std.seek(0, os.SEEK_SET)
+        print(yaml.dump(json.loads(std.read())))
     else:
         df.to_csv(sys.stdout)
