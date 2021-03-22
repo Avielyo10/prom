@@ -6,4 +6,4 @@ resources:
 - configmap.yaml 
 - service.yaml
 - servicemonitor.yaml
-- deployment.yaml
+- daemonset.yaml

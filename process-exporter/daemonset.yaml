@@ -1,5 +1,5 @@
 apiVersion: apps/v1
-kind: Deployment
+kind: DaemonSet
 metadata:
   name: process-exporter
 spec:
@@ -14,6 +14,8 @@ spec:
       name: process-exporter
       namespace: openshift-monitoring
     spec:
+      tolerations:
+        - operator: Exists
       containers:
         - args:
             - -config.path
@@ -56,8 +58,6 @@ spec:
       serviceAccount: node-exporter
       serviceAccountName: node-exporter
       terminationGracePeriodSeconds: 30
-      tolerations:
-        - operator: Exists
       volumes:
         - hostPath:
             path: /proc
