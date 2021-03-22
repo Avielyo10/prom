@@ -2,6 +2,7 @@
 setup.py for using pip
 """
 import setuptools
+from glob import glob
 
 with open("README.md", "r", encoding="utf-8") as readme_file:
     long_description = readme_file.read()
@@ -28,6 +29,7 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     python_requires='>=3.5',
+    data_files=[('.prom', glob('process-exporter/*.yaml'))],
     entry_points='''
         [console_scripts]
         prom=prometheus.cli:main

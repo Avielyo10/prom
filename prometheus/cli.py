@@ -71,3 +71,7 @@ def metrics(host, token, interval, time, skip_namespaces, output, sort_by):
         print(yaml.dump(json.loads(std.read()), sort_keys=False))
     else:
         df.to_csv(sys.stdout)
+
+@main.command()
+def deploy():
+    
