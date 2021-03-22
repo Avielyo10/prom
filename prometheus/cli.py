@@ -59,9 +59,9 @@ def metrics(host, token, interval, time, skip_namespaces, output):
     values_df = pd.DataFrame(combined_metrics.values())
     df = keys_df.join(values_df)
 
-    if output is 'json':
+    if output == 'json':
         df.to_json(sys.stdout, orient='index')
-    elif output is 'yaml':
+    elif output == 'yaml':
         std = StringIO()
         df.to_json(std, orient='index')
         std.seek(0, os.SEEK_SET)
