@@ -11,7 +11,6 @@ import pandas as pd
 from io import StringIO
 
 from .prometheus import Prometheus
-from .util import *
 
 
 @click.group()
@@ -42,12 +41,13 @@ def metrics(host, token, interval, time, skip_namespaces, output):
     prometheus = Prometheus(host, token)
 
     metric_set = [
-        filtered_metric("namedprocess_namegroup_cpu_rate",
-                        filter_out("groupname", "conmon")),
-        filtered_metric("pod:container_cpu_usage:sum", filter_out(
-            "podname", "process-exp.*"), filter_out("namespace", *skip_namespaces))
+        Prometheus.filtered_metric("namedprocess_namegroup_cpu_rate",
+            Prometheus.filter_out("groupname", "conmon")),
+        Prometheus.filtered_metric("pod:container_cpu_usage:sum",
+            Prometheus.filter_out("podname", "process-exp.*"),
+            Prometheus.filter_out("namespace", *skip_namespaces))
     ]
-    combined_metrics = multicollect(prometheus, metric_set, {
+    combined_metrics = prometheus.multicollect(metric_set, {
         f'avg over {interval}': lambda metric, interval: f"avg_over_time({metric}[{interval}])",
         f'min over {interval}': lambda metric, interval: f"min_over_time({metric}[{interval}])",
         f'max over {interval}': lambda metric, interval: f"max_over_time({metric}[{interval}])",
