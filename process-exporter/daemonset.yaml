@@ -15,8 +15,7 @@ spec:
       namespace: openshift-monitoring
     spec:
       tolerations:
-        - key: node-role.kubernetes.io/worker
-          effect: NoSchedule
+        - operator: Exists
       containers:
         - args:
             - -config.path
