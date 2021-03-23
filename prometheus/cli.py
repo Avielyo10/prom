@@ -56,6 +56,8 @@ def metrics(host, token, interval, time, skip_namespaces, output):
     keys = list(json.loads(d.replace('\'', '\"'))
                 for d in combined_metrics.keys())
     [key.update({'uniqueId': ':'.join(map(str, key.values()))}) for key in keys]
+    keys = list({ k : v for k, v in key.items() if k == 'uniqueId'} for key in keys)
+    
     keys_df = pd.DataFrame(keys)
     values_df = pd.DataFrame(combined_metrics.values())
     df = keys_df.join(values_df)
