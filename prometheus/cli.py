@@ -59,7 +59,8 @@ def metrics(host, token, interval, time, skip_namespaces, output):
     keys_df = pd.DataFrame(keys)
     values_df = pd.DataFrame(combined_metrics.values())
     df = keys_df.join(values_df)
-
+    df.set_index('uniqueId', inplace=True)
+    
     if output == 'json':
         df.to_json(sys.stdout, orient='index')
     elif output == 'yaml':
