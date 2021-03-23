@@ -42,10 +42,11 @@ def metrics(host, token, interval, time, skip_namespaces, output):
 
     metric_set = [
         Prometheus.filtered_metric("namedprocess_namegroup_cpu_rate",
-            Prometheus.filter_out("groupname", "conmon")),
+                                   Prometheus.filter_out("groupname", "conmon")),
         Prometheus.filtered_metric("pod:container_cpu_usage:sum",
-            Prometheus.filter_out("podname", "process-exp.*"),
-            Prometheus.filter_out("namespace", *skip_namespaces))
+                                   Prometheus.filter_out(
+                                       "podname", "process-exp.*"),
+                                   Prometheus.filter_out("namespace", *skip_namespaces))
     ]
     combined_metrics = prometheus.multicollect(metric_set, {
         f'avg over {interval}': lambda metric, interval: f"avg_over_time({metric}[{interval}])",
@@ -55,14 +56,16 @@ def metrics(host, token, interval, time, skip_namespaces, output):
 
     keys = list(json.loads(d.replace('\'', '\"'))
                 for d in combined_metrics.keys())
-    [key.update({'uniqueId': ':'.join(map(str, key.values()))}) for key in keys]
-    keys = list({ k : v for k, v in key.items() if k == 'uniqueId'} for key in keys)
-    
+    [key.update({'uniqueId': ':'.join(map(str, key.values()))})
+     for key in keys]
+    keys = list({k: v for k, v in key.items() if k == 'uniqueId'}
+                for key in keys)
+
     keys_df = pd.DataFrame(keys)
     values_df = pd.DataFrame(combined_metrics.values())
     df = keys_df.join(values_df)
     df.set_index('uniqueId', inplace=True)
-    
+
     if output == 'json':
         df.to_json(sys.stdout, orient='index')
     elif output == 'yaml':
