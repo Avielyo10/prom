@@ -20,6 +20,7 @@ setuptools.setup(
         'Click',
         'PyYAML',
         'requests',
+        'pandas',
     ],
     classifiers=[
         "Programming Language :: Python :: 3",
