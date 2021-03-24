@@ -79,7 +79,7 @@ class Prometheus():
 
         def __init__(self, json):
             self.json = json
-            self.name = json['metric']
+            self.name = {'uniqueId': ':'.join(map(str, json['metric'].values()))}
             self.time = json['value'][0]
             self.value = json['value'][1]
 
