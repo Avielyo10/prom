@@ -37,7 +37,8 @@ Adding additional skip_namespaces will also exclude any pods that match from the
 @click.option('--time', '-T', default=None, help="")
 @click.option('--skip-namespaces', '-s', default=None, multiple=True, show_default=True)
 @click.option('--output', '-o', type=click.Choice(['csv', 'json', 'yaml']), default='csv')
-def metrics(host, token, interval, time, skip_namespaces, output):
+@click.option('--filter-out', '-f', type=click.Path(), help="Path to metric set yaml")
+def metrics(host, token, interval, time, skip_namespaces, output, filter_out):
     prometheus = Prometheus(host, token)
 
     metric_set = [
@@ -48,6 +49,8 @@ def metrics(host, token, interval, time, skip_namespaces, output):
                                        "podname", "process-exp.*"),
                                    Prometheus.filter_out("namespace", *skip_namespaces))
     ]
+    if filter_out:
+        metric_set = metric_set + prometheus.get_metrics_from_file(filter_out) 
     combined_metrics = prometheus.multicollect(metric_set, {
         f'avg over {interval}': lambda metric, interval: f"avg_over_time({metric}[{interval}])",
         f'min over {interval}': lambda metric, interval: f"min_over_time({metric}[{interval}])",

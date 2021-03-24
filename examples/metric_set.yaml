@@ -1,0 +1,5 @@
+- namedprocess_namegroup_cpu_rate:
+    - groupname: "conmon"
+- pod:container_cpu_usage:sum:
+    - podname: "process-exp.*"
+    - namespace: "bla"
