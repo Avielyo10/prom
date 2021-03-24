@@ -64,6 +64,6 @@ def metrics(host, token, interval, time, skip_namespaces, output):
         std = StringIO()
         df.to_json(std, orient='index')
         std.seek(0, os.SEEK_SET)
-        print(yaml.dump(json.loads(std.read())))
+        print(yaml.dump(json.loads(std.read()), sort_keys=False))
     else:
         df.to_csv(sys.stdout)
