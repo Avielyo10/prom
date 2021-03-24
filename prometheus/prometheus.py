@@ -1,5 +1,6 @@
 from .validators import validate_time
 import requests
+import yaml
 import urllib3
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
@@ -103,3 +104,17 @@ class Prometheus():
         if len(validPatterns) > 0:
             result = f"{labelname}!~\"{'|'.join(validPatterns)}\""
         return result
+    
+    @staticmethod
+    def get_metrics_from_file(path):
+        metric_set = list()
+        with open(path, 'r') as in_file:
+            metrics = yaml.load(in_file, Loader=yaml.FullLoader)
+            for metric in metrics:
+                for base_metric, filter_out in metric.items():
+                    filters = list()
+                    for filter in filter_out:
+                        for k, v in filter.items():
+                            filters.append(Prometheus.filter_out(k, v))
+                    metric_set.append(Prometheus.filtered_metric(base_metric, filters))
+        return metric_set
