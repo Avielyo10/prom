@@ -35,7 +35,7 @@ Adding additional skip_namespaces will also exclude any pods that match from the
 @click.option('--token', '-t', required=True, type=str, help="Token for authentication, try `oc whoami -t`")
 @click.option('--interval', '-i', type=str, default="1h", show_default=True, help="")
 @click.option('--time', '-T', default=None, help="")
-@click.option('--skip-namespaces', '-s', default=None, multiple=True, show_default=True)
+@click.option('--skip-namespaces', '-S', default=None, multiple=True, show_default=True)
 @click.option('--output', '-o', type=click.Choice(['csv', 'json', 'yaml']), default='csv')
 def metrics(host, token, interval, time, skip_namespaces, output):
     prometheus = Prometheus(host, token)
