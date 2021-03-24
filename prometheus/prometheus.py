@@ -59,7 +59,7 @@ class Prometheus():
         result = {}
         for setname, metrics in metric_sets.items():
             for m in metrics:
-                metricname = repr(m.name)
+                metricname = m.name
                 if metricname not in result:
                     result[metricname] = {}
                 result[metricname][setname] = m.value
@@ -79,7 +79,7 @@ class Prometheus():
 
         def __init__(self, json):
             self.json = json
-            self.name = {'uniqueId': ':'.join(map(str, json['metric'].values()))}
+            self.name = ':'.join(map(str, json['metric'].values()))
             self.time = json['value'][0]
             self.value = json['value'][1]
 
