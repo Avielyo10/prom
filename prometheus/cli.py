@@ -35,9 +35,10 @@ Adding additional skip_namespaces will also exclude any pods that match from the
 @click.option('--token', '-t', required=True, type=str, help="Token for authentication, try `oc whoami -t`")
 @click.option('--interval', '-i', type=str, default="1h", show_default=True, help="")
 @click.option('--time', '-T', default=None, help="")
-@click.option('--skip-namespaces', '-s', default=None, multiple=True, show_default=True)
+@click.option('--skip-namespaces', '-S', default=None, multiple=True, show_default=True)
 @click.option('--output', '-o', type=click.Choice(['csv', 'json', 'yaml']), default='csv')
-def metrics(host, token, interval, time, skip_namespaces, output):
+@click.option('--sort-by', '-s', type=click.Choice(['min', 'max', 'avg']), default=None)
+def metrics(host, token, interval, time, skip_namespaces, output, sort_by):
     prometheus = Prometheus(host, token)
 
     metric_set = [
@@ -58,12 +59,15 @@ def metrics(host, token, interval, time, skip_namespaces, output):
     df['uniqueId'] = combined_metrics.keys()
     df.set_index('uniqueId', inplace=True)
 
+    if sort_by is not None:
+        df.sort_values(by=f'{sort_by} over {interval}', inplace=True)
+        
     if output == 'json':
         df.to_json(sys.stdout, orient='index')
     elif output == 'yaml':
         std = StringIO()
         df.to_json(std, orient='index')
         std.seek(0, os.SEEK_SET)
-        print(yaml.dump(json.loads(std.read())))
+        print(yaml.dump(json.loads(std.read()), sort_keys=False))
     else:
         df.to_csv(sys.stdout)
