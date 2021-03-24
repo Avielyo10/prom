@@ -42,10 +42,11 @@ def metrics(host, token, interval, time, skip_namespaces, output):
 
     metric_set = [
         Prometheus.filtered_metric("namedprocess_namegroup_cpu_rate",
-            Prometheus.filter_out("groupname", "conmon")),
+                                   Prometheus.filter_out("groupname", "conmon")),
         Prometheus.filtered_metric("pod:container_cpu_usage:sum",
-            Prometheus.filter_out("podname", "process-exp.*"),
-            Prometheus.filter_out("namespace", *skip_namespaces))
+                                   Prometheus.filter_out(
+                                       "podname", "process-exp.*"),
+                                   Prometheus.filter_out("namespace", *skip_namespaces))
     ]
     combined_metrics = prometheus.multicollect(metric_set, {
         f'avg over {interval}': lambda metric, interval: f"avg_over_time({metric}[{interval}])",
@@ -53,11 +54,9 @@ def metrics(host, token, interval, time, skip_namespaces, output):
         f'max over {interval}': lambda metric, interval: f"max_over_time({metric}[{interval}])",
     }, interval=interval, time=time)
 
-    keys = list(json.loads(d.replace('\'', '\"'))
-                for d in combined_metrics.keys())
-    keys_df = pd.DataFrame(keys)
-    values_df = pd.DataFrame(combined_metrics.values())
-    df = keys_df.join(values_df)
+    df = pd.DataFrame(combined_metrics.values())
+    df['uniqueId'] = combined_metrics.keys()
+    df.set_index('uniqueId', inplace=True)
 
     if output == 'json':
         df.to_json(sys.stdout, orient='index')
