@@ -11,6 +11,7 @@ import pandas as pd
 import openshift as oc
 
 from io import StringIO
+from glob import glob
 
 from .prometheus import Prometheus
 
@@ -86,23 +87,22 @@ def delete():
 
 
 def oc_handler(func, msg):
-    files_path, list_of_files = get_data_file_dir()
+    files_path = get_data_file_path()
+    list_of_files = glob(f'{files_path}/*.yaml')
+    list_of_files.remove(f'{files_path}/kustomization.yaml')
     for file in list_of_files:
-        with open(os.path.join(files_path, file), 'r') as resource:
+        with open(file, 'r') as resource:
             try:
                 func(yaml.load(resource, Loader=yaml.FullLoader))
-                print(file.split('.')[0], msg)
+                print(os.path.basename(file).split('.')[0], msg)
             except oc.model.OpenShiftPythonException as e:
-                print(e.msg, file.split('.')[0])
+                print(e.msg, os.path.basename(file).split('.')[0])
 
 
-def get_data_file_dir():
+def get_data_file_path():
     files_path = os.path.join(sys.exec_prefix, 'local', '.prom')
     if not os.path.isdir(files_path):
         files_path = os.path.join(sys.exec_prefix, '.prom')
         if not os.path.isdir(files_path):
             raise Exception("[ERROR] Couldn't find data files")
-    list_of_files = ["prometheusRules.yaml", "configmap.yaml",
-                     "service.yaml", "servicemonitor.yaml", "daemonset.yaml"]
-
-    return files_path, list_of_files
+    return files_path
