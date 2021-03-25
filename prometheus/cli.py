@@ -8,9 +8,9 @@ import sys
 import json
 import yaml
 import pandas as pd
-from io import StringIO
-
 import openshift as oc
+
+from io import StringIO
 
 from .prometheus import Prometheus
 
