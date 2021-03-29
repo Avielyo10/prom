@@ -19,8 +19,12 @@ from .prometheus import Prometheus
 @click.group()
 @click.version_option()
 def main():
-    """
-    Main click group for future commands
+    """\b
+     _ __  _ __ ___  _ __ ___  
+    | '_ \| '__/ _ \| '_ ` _ \ 
+    | |_) | | | (_) | | | | | |
+    | .__/|_|  \___/|_| |_| |_|
+    |_|                        
     """
     pass
 
