@@ -8,7 +8,10 @@ import sys
 import json
 import yaml
 import pandas as pd
+import openshift as oc
+
 from io import StringIO
+from glob import glob
 
 from .prometheus import Prometheus
 
@@ -16,8 +19,12 @@ from .prometheus import Prometheus
 @click.group()
 @click.version_option()
 def main():
-    """
-    Main click group for future commands
+    """\b
+     _ __  _ __ ___  _ __ ___  
+    | '_ \| '__/ _ \| '_ ` _ \ 
+    | |_) | | | (_) | | | | | |
+    | .__/|_|  \___/|_| |_| |_|
+    |_|                        
     """
     pass
 
@@ -33,8 +40,8 @@ Adding additional skip_namespaces will also exclude any pods that match from the
 @click.option('--host', '-h', required=True, type=str, help="Prometheus host, try \
 `oc get route prometheus-k8s -n openshift-monitoring -o jsonpath='{.status.ingress[0].host}'`")
 @click.option('--token', '-t', required=True, type=str, help="Token for authentication, try `oc whoami -t`")
-@click.option('--interval', '-i', type=str, default="1h", show_default=True, help="")
-@click.option('--time', '-T', default=None, help="")
+@click.option('--interval', '-i', type=str, default="1h", show_default=True)
+@click.option('--time', '-T', default=None)
 @click.option('--skip-namespaces', '-S', default=None, multiple=True, show_default=True)
 @click.option('--output', '-o', type=click.Choice(['csv', 'json', 'yaml']), default='csv')
 @click.option('--sort-by', '-s', type=click.Choice(['min', 'max', 'avg']), default=None)
@@ -61,7 +68,7 @@ def metrics(host, token, interval, time, skip_namespaces, output, sort_by):
 
     if sort_by is not None:
         df.sort_values(by=f'{sort_by} over {interval}', inplace=True)
-        
+
     if output == 'json':
         df.to_json(sys.stdout, orient='index')
     elif output == 'yaml':
@@ -71,3 +78,35 @@ def metrics(host, token, interval, time, skip_namespaces, output, sort_by):
         print(yaml.dump(json.loads(std.read()), sort_keys=False))
     else:
         df.to_csv(sys.stdout)
+
+
+@main.command(help="Deploy process-exporter resources")
+def deploy():
+    oc_handler(oc.apply, "deployed.")
+
+
+@main.command(help="Delete process-exporter resources")
+def delete():
+    oc_handler(oc.delete, "deleted.")
+
+
+def oc_handler(func, msg):
+    files_path = get_data_file_path()
+    list_of_files = glob(f'{files_path}/*.yaml')
+    list_of_files.remove(f'{files_path}/kustomization.yaml')
+    for file in list_of_files:
+        with open(file, 'r') as resource:
+            try:
+                func(yaml.load(resource, Loader=yaml.FullLoader))
+                print(os.path.basename(file).split('.')[0], msg)
+            except oc.model.OpenShiftPythonException as e:
+                print(e.msg, os.path.basename(file).split('.')[0])
+
+
+def get_data_file_path():
+    files_path = os.path.join(sys.exec_prefix, 'local', '.prom')
+    if not os.path.isdir(files_path):
+        files_path = os.path.join(sys.exec_prefix, '.prom')
+        if not os.path.isdir(files_path):
+            raise Exception("[ERROR] Couldn't find data files")
+    return files_path
