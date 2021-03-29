@@ -16,6 +16,27 @@ non-pod processes.
 The objects in process-exporter wrap a custom build of the PPID-filtwering
 process-exporter with proper prometheus config to bring it all together.
 
+## prom tool usage
+The prom tool can deploy/delete its resources from the cluster just by `prom deploy` or `prom delete`, prom assumes that prometheus deployed in `openshift-monitoring` namespace & that you have the permissions to deploy/delete from that namespace.
+
+In order to gather the metrics, we use `prom metrics` with the following options:
+```
+-h, --host TEXT               Prometheus host, try `oc get route
+                            prometheus-k8s -n openshift-monitoring -o
+                            jsonpath='{.status.ingress[0].host}'`
+                            [required]
+
+-t, --token TEXT              Token for authentication, try `oc whoami -t`
+                            [required]
+
+-i, --interval TEXT           [default: 1h]
+-T, --time TEXT
+-S, --skip-namespaces TEXT
+-o, --output [csv|json|yaml]
+-s, --sort-by [min|max|avg]
+```
+For example `prom metrics -h ocp48.demo.lab.ayosef -t $(oc whoami -t) -o yaml` will query the host at `ocp48.demo.lab.ayosef` for the average, min, and max values over 1h & output the result as yaml.
+
 ## Additional recording rules
 
 Prometheus recording rules basically can do a calculation at each scape as the
