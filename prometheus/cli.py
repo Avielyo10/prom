@@ -36,8 +36,8 @@ Adding additional skip_namespaces will also exclude any pods that match from the
 @click.option('--host', '-h', required=True, type=str, help="Prometheus host, try \
 `oc get route prometheus-k8s -n openshift-monitoring -o jsonpath='{.status.ingress[0].host}'`")
 @click.option('--token', '-t', required=True, type=str, help="Token for authentication, try `oc whoami -t`")
-@click.option('--interval', '-i', type=str, default="1h", show_default=True, help="")
-@click.option('--time', '-T', default=None, help="")
+@click.option('--interval', '-i', type=str, default="1h", show_default=True)
+@click.option('--time', '-T', default=None)
 @click.option('--skip-namespaces', '-S', default=None, multiple=True, show_default=True)
 @click.option('--output', '-o', type=click.Choice(['csv', 'json', 'yaml']), default='csv')
 @click.option('--sort-by', '-s', type=click.Choice(['min', 'max', 'avg']), default=None)
