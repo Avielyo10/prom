@@ -12,6 +12,7 @@ import openshift as oc
 
 from io import StringIO
 from glob import glob
+from pathlib import Path
 
 from .prometheus import Prometheus
 
@@ -104,9 +105,17 @@ def oc_handler(func, msg):
 
 
 def get_data_file_path():
-    files_path = os.path.join(sys.exec_prefix, 'local', '.prom')
-    if not os.path.isdir(files_path):
-        files_path = os.path.join(sys.exec_prefix, '.prom')
-        if not os.path.isdir(files_path):
-            raise Exception("[ERROR] Couldn't find data files")
-    return files_path
+    files_paths = [
+        os.path.join(str(Path.home()), '.local', '.prom'),
+        os.path.join(sys.exec_prefix, 'local', '.prom'),
+        os.path.join(sys.exec_prefix, '.prom')
+    ]
+    files_path = None
+    for path in files_paths:
+        if os.path.isdir(path):
+            files_path = path
+            break
+    if files_path is None:
+        raise Exception("[ERROR] Couldn't find data files") 
+    else:
+        return files_path
