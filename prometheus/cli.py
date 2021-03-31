@@ -95,6 +95,7 @@ def oc_handler(func, msg):
     files_path = get_data_file_path()
     list_of_files = glob(f'{files_path}/*.yaml')
     list_of_files.remove(f'{files_path}/kustomization.yaml')
+    list_of_files.sort()
     for file in list_of_files:
         with open(file, 'r') as resource:
             try:
