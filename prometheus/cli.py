@@ -38,25 +38,34 @@ If not specified, interval defaults to 1h and timestamp defaults to now
 By default, skips any pod named "process-exp.*" to exclude the process-exporter itself
 Adding additional skip_namespaces will also exclude any pods that match from the pod CPU usage accounting, so we can exclude workloads if required
 """)
-@click.option('--host', '-h', required=True, type=str, help="Prometheus host, try \
-`oc get route prometheus-k8s -n openshift-monitoring -o jsonpath='{.status.ingress[0].host}'`")
+@click.option('--host', '-h', required=True, type=str, help="""
+Prometheus host, try 
+`oc get route prometheus-k8s -n openshift-monitoring -o jsonpath='{.status.ingress[0].host}'`
+""")
 @click.option('--token', '-t', required=True, type=str, help="Token for authentication, try `oc whoami -t`")
 @click.option('--interval', '-i', type=str, default="1h", show_default=True)
 @click.option('--time', '-T', default=None)
 @click.option('--skip-namespaces', '-S', default=None, multiple=True, show_default=True)
 @click.option('--output', '-o', type=click.Choice(['csv', 'json', 'yaml']), default='csv')
 @click.option('--sort-by', '-s', type=click.Choice(['min', 'max', 'avg']), default=None)
-def metrics(host, token, interval, time, skip_namespaces, output, sort_by):
+@click.option('--metric-type', '-m', type=click.Choice(['housekeeping', 'infra']), default=None)
+def metrics(host, token, interval, time, skip_namespaces, output, sort_by, metric_type):
     prometheus = Prometheus(host, token)
 
-    metric_set = [
-        Prometheus.filtered_metric("namedprocess_namegroup_cpu_rate",
-                                   Prometheus.filter_out("groupname", "conmon")),
-        Prometheus.filtered_metric("pod:container_cpu_usage:sum",
-                                   Prometheus.filter_out(
-                                       "podname", "process-exp.*"),
-                                   Prometheus.filter_out("namespace", *skip_namespaces))
-    ]
+    metrics = {
+        "housekeeping": Prometheus.filtered_metric("namedprocess_namegroup_cpu_rate",
+                                       Prometheus.filter_out("groupname", "conmon")),
+        "infra": Prometheus.filtered_metric("pod:container_cpu_usage:sum",
+                                       Prometheus.filter_out(
+                                           "podname", "process-exp.*"),
+                                       Prometheus.filter_out("namespace", *skip_namespaces))
+    }
+    metric_set = list()
+    if metric_type is not None:
+        metric_set.append(metrics[metric_type])
+    else:
+        metric_set += list(metrics.values())
+
     combined_metrics = prometheus.multicollect(metric_set, {
         f'avg over {interval}': lambda metric, interval: f"avg_over_time({metric}[{interval}])",
         f'min over {interval}': lambda metric, interval: f"min_over_time({metric}[{interval}])",
@@ -117,6 +126,6 @@ def get_data_file_path():
             files_path = path
             break
     if files_path is None:
-        raise Exception("[ERROR] Couldn't find data files") 
+        raise Exception("[ERROR] Couldn't find data files")
     else:
         return files_path
