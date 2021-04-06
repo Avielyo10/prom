@@ -54,17 +54,13 @@ def metrics(host, token, interval, time, skip_namespaces, output, sort_by, metri
 
     metrics = {
         "housekeeping": Prometheus.filtered_metric("namedprocess_namegroup_cpu_rate",
-                                       Prometheus.filter_out("groupname", "conmon")),
+                                                   Prometheus.filter_out("groupname", "conmon")),
         "infra": Prometheus.filtered_metric("pod:container_cpu_usage:sum",
-                                       Prometheus.filter_out(
-                                           "podname", "process-exp.*"),
-                                       Prometheus.filter_out("namespace", *skip_namespaces))
+                                            Prometheus.filter_out(
+                                                "podname", "process-exp.*"),
+                                            Prometheus.filter_out("namespace", *skip_namespaces))
     }
-    metric_set = list()
-    if metric_type is not None:
-        metric_set.append(metrics[metric_type])
-    else:
-        metric_set += list(metrics.values())
+    metric_set = [metrics[metric_type]] if metric_type is not None else list(metrics.values())
 
     combined_metrics = prometheus.multicollect(metric_set, {
         f'avg over {interval}': lambda metric, interval: f"avg_over_time({metric}[{interval}])",
