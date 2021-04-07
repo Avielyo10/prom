@@ -21,19 +21,23 @@ The prom tool can deploy/delete its resources from the cluster just by `prom dep
 
 In order to gather the metrics, we use `prom metrics` with the following options:
 ```
--h, --host TEXT               Prometheus host, try `oc get route
-                            prometheus-k8s -n openshift-monitoring -o
-                            jsonpath='{.status.ingress[0].host}'`
-                            [required]
+  -h, --host TEXT                 Prometheus host, try  `oc get route
+                                  prometheus-k8s -n openshift-monitoring -o
+                                  jsonpath='{.status.ingress[0].host}'`
+                                  [required]
 
--t, --token TEXT              Token for authentication, try `oc whoami -t`
-                            [required]
+  -t, --token TEXT                Token for authentication, try `oc whoami -t`
+                                  [required]
 
--i, --interval TEXT           [default: 1h]
--T, --time TEXT
--S, --skip-namespaces TEXT
--o, --output [csv|json|yaml]
--s, --sort-by [min|max|avg]
+  -i, --interval TEXT             [default: 1h]
+  -T, --time TEXT
+  -S, --skip-namespaces TEXT
+  -o, --output [csv|json|yaml]
+  -s, --sort-by [min|max|avg]
+  -m, --metric-type [housekeeping|infra]
+  --tail / --head                 Get the last/first 5 consumers
+  --last / --first                Get the last/first consumer
+  --help                          Show this message and exit.
 ```
 For example `prom metrics -h ocp48.demo.lab.ayosef -t $(oc whoami -t) -o yaml` will query the host at `ocp48.demo.lab.ayosef` for the average, min, and max values over 1h & output the result as yaml.
 
