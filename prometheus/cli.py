@@ -49,7 +49,9 @@ Prometheus host, try
 @click.option('--output', '-o', type=click.Choice(['csv', 'json', 'yaml']), default='csv')
 @click.option('--sort-by', '-s', type=click.Choice(['min', 'max', 'avg']), default=None)
 @click.option('--metric-type', '-m', type=click.Choice(['housekeeping', 'infra']), default=None)
-def metrics(host, token, interval, time, skip_namespaces, output, sort_by, metric_type):
+@click.option('--tail/--head', default=None, help="Get the last/first 5 consumers")
+@click.option('--last/--first', default=None, help="Get the last/first consumer")
+def metrics(host, token, interval, time, skip_namespaces, output, sort_by, metric_type, tail, last):
     prometheus = Prometheus(host, token)
 
     metrics = {
@@ -74,6 +76,12 @@ def metrics(host, token, interval, time, skip_namespaces, output, sort_by, metri
 
     if sort_by is not None:
         df.sort_values(by=f'{sort_by} over {interval}', inplace=True)
+
+    if tail is not None:
+        df = df.tail() if tail else df.head()
+
+    if last is not None:
+        df = df.tail(1) if last else df.head(1)
 
     if output == 'json':
         df.to_json(sys.stdout, orient='index')
