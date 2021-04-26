@@ -5,6 +5,7 @@ prome cli
 import click
 import os
 import sys
+import site
 import json
 import yaml
 import pandas as pd
@@ -120,6 +121,7 @@ def oc_handler(func, msg):
 
 def get_data_file_path():
     files_paths = [
+        os.path.join(site.USER_BASE, '.prom'),
         os.path.join(str(Path.home()), '.local', '.prom'),
         os.path.join(sys.exec_prefix, 'local', '.prom'),
         os.path.join(sys.exec_prefix, '.prom')
